@@ -1,0 +1,84 @@
+# Logs Pipeline - Filebeat + Elasticsearch + Kibana
+
+## Visão Geral
+Este sistema utiliza **Filebeat**, **Elasticsearch** e **Kibana** para coletar, processar e visualizar logs de aplicações. Os logs são armazenados na pasta `logs/` e são enviados para o Elasticsearch via Filebeat.
+
+### Componentes:
+- **Filebeat**: Coleta logs e os envia para o Elasticsearch.
+- **Elasticsearch**: Armazena e indexa os logs.
+- **Kibana**: Permite a visualização e análise dos logs.
+
+---
+
+## Estrutura do Projeto
+```
+logs_pipeline/
+│── docker-compose.yml
+│── filebeat.yml
+│── pipeline_logs.json
+│── logs/
+│   ├── app.log
+│   ├── error.log
+│   ├── access.log
+```
+
+### Descrição dos Arquivos:
+- **docker-compose.yml**: Define os containers do Elasticsearch, Kibana e Filebeat.
+- **filebeat.yml**: Configura o Filebeat para ler e processar logs.
+- **pipeline_logs.json**: Define um pipeline de processamento de logs no Elasticsearch.
+- **logs/**: Pasta onde os logs da aplicação são armazenados.
+
+---
+
+## Como Executar o Sistema
+
+### 1. Subindo os Containers
+Certifique-se de que o Docker e o Docker Compose estão instalados e execute:
+```sh
+docker-compose up -d
+```
+Isso iniciará os seguintes containers:
+- **Elasticsearch** (porta 9200)
+- **Kibana** (porta 5601)
+- **Filebeat**
+
+### 2. Criando o Pipeline de Logs no Elasticsearch
+Para processar os logs corretamente, crie o pipeline:
+```sh
+curl -X PUT "http://localhost:9200/_ingest/pipeline/pipeline_logs" -H "Content-Type: application/json" -d @pipeline_logs.json
+```
+
+### 3. Testando a Coleta de Logs
+Adicione alguns logs na pasta `logs/`, por exemplo, no arquivo `logs/app.log`:
+```
+Feb 14 10:45:32 myserver myapp[1234]: INFO: Aplicação iniciada com sucesso
+Feb 14 10:46:12 myserver myapp[1234]: ERROR: Falha ao conectar ao banco de dados
+Feb 14 10:47:05 myserver myapp[1234]: DEBUG: Requisição recebida do IP 192.168.1.1
+```
+O Filebeat coletará esses logs e os enviará para o Elasticsearch automaticamente.
+
+### 4. Acessando o Kibana para Visualização
+1. Acesse o Kibana em [http://localhost:5601](http://localhost:5601)
+2. Vá para **Discover** e selecione o índice correspondente (`filebeat-*`).
+3. Explore os logs com filtros e buscas.
+
+---
+
+## Funcionamento do Sistema
+1. O **Filebeat** monitora arquivos de log na pasta `logs/` e os envia ao **Elasticsearch**.
+2. O **Elasticsearch** indexa os logs e processa os dados conforme o pipeline `pipeline_logs`.
+3. O **Kibana** permite explorar e visualizar os logs coletados, fornecendo insights sobre erros, acessos e eventos das aplicações.
+
+---
+
+## Parando o Sistema
+Para parar os containers:
+```sh
+docker-compose down
+```
+Isso desligará todos os serviços.
+
+---
+
+Agora seu sistema de logging está configurado e pronto para uso! 🚀
+
